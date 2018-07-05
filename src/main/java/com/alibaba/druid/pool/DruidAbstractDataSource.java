@@ -107,6 +107,9 @@ public abstract class DruidAbstractDataSource extends WrapperAdapter implements 
 
     protected volatile int                             initialSize                               = DEFAULT_INITIAL_SIZE;
     protected volatile int                             maxActive                                 = DEFAULT_MAX_ACTIVE_SIZE;
+
+
+    // 最小空闲连接数
     protected volatile int                             minIdle                                   = DEFAULT_MIN_IDLE;
     protected volatile int                             maxIdle                                   = DEFAULT_MAX_IDLE;
     protected volatile long                            maxWait                                   = DEFAULT_MAX_WAIT;
@@ -141,7 +144,11 @@ public abstract class DruidAbstractDataSource extends WrapperAdapter implements 
 
     protected volatile long                            timeBetweenEvictionRunsMillis             = DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
     protected volatile int                             numTestsPerEvictionRun                    = DEFAULT_NUM_TESTS_PER_EVICTION_RUN;
+
+    // 连接保持空闲而不被驱逐的最小空闲时间
     protected volatile long                            minEvictableIdleTimeMillis                = DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
+
+    // 最大可以回收的空闲时间
     protected volatile long                            maxEvictableIdleTimeMillis                = DEFAULT_MAX_EVICTABLE_IDLE_TIME_MILLIS;
     protected volatile long                            phyTimeoutMillis                          = DEFAULT_PHY_TIMEOUT_MILLIS;
 

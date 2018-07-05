@@ -108,6 +108,8 @@ public class DruidDataSource extends DruidAbstractDataSource implements DruidDat
     private long                             poolingPeakTime           = 0;
     // store
     private volatile DruidConnectionHolder[] connections;
+
+    // 连接池数量，连接池数组中当前可用连接数的数量
     private int                              poolingCount              = 0;
     private int                              activeCount               = 0;
     private long                             discardCount              = 0;
@@ -2743,6 +2745,7 @@ public class DruidDataSource extends DruidAbstractDataSource implements DruidDat
                 return;
             }
 
+            // 获取需要检查的连接的数量(当前连接池总数 - 最小空闲连接数)
             final int checkCount = poolingCount - minIdle;
             final long currentTimeMillis = System.currentTimeMillis();
             for (int i = 0; i < poolingCount; ++i) {
@@ -2752,6 +2755,7 @@ public class DruidDataSource extends DruidAbstractDataSource implements DruidDat
                     if (phyTimeoutMillis > 0) {
                         long phyConnectTimeMillis = currentTimeMillis - connection.connectTimeMillis;
                         if (phyConnectTimeMillis > phyTimeoutMillis) {
+                            // 不管连接是否空闲，当谅解存活时间超过phyTimeoutMillis设置的时间后，强制回收
                             evictConnections[evictCount++] = connection;
                             continue;
                         }
@@ -2760,14 +2764,22 @@ public class DruidDataSource extends DruidAbstractDataSource implements DruidDat
                     long idleMillis = currentTimeMillis - connection.lastActiveTimeMillis;
 
                     if (idleMillis < minEvictableIdleTimeMillis) {
+                        // 连接池中的所有连接，下标越小空闲时间越长。
+                        // 当最大的空闲时间都比最小回收时间的时候，后续的连接就不需要处理了。
                         break;
                     }
 
                     if (checkTime && i < checkCount) {
+                        // 对所有超过最小空闲连接数的数据库连接，放到连接回收数组中
                         evictConnections[evictCount++] = connection;
                     } else if (idleMillis > maxEvictableIdleTimeMillis) {
+                        // 在最小空闲连接数之内的连接，检查空闲时间是否超过最大的可回收空闲时间间隔。
+                        // 如果超过，则也需要回收
                         evictConnections[evictCount++] = connection;
                     } else if (keepAlive) {
+                        // 在最小空闲连接数之内的连接，如果连接的空闲时间超过了minEvictableIdleTimeMillis
+                        // 但没有超过maxEvictableIdleTimeMillis，当设置了keepAlive，
+                        // 这些连接将会放到存活连接的数组中，对这些连接做keepAlive操作
                         keepAliveConnections[keepAliveCount++] = connection;
                     }
                 } else {
