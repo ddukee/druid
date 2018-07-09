@@ -49,6 +49,7 @@ public final class DruidConnectionHolder {
     protected final Connection                    conn;
     protected final List<ConnectionEventListener> connectionEventListeners = new CopyOnWriteArrayList<ConnectionEventListener>();
     protected final List<StatementEventListener>  statementEventListeners  = new CopyOnWriteArrayList<StatementEventListener>();
+    // 数据库连接被创建的时间
     protected final long                          connectTimeMillis;
     protected volatile long                       lastActiveTimeMillis;
     protected volatile long                       lastValidTimeMillis;
